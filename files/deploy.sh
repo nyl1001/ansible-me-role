@@ -87,8 +87,8 @@ doGenesisOperate() {
 
     # Allocate genesis accounts (cosmos formatted addresses)
     # execShellCommand "./$chainBinName add-genesis-account $(./$chainBinName keys show superadmin -a $withKeyringBackendParam) 4000000000src,16000000000srg --home node1"
-    execShellCommand "./$chainBinName add-genesis-account $(./"$chainBinName" keys show $adminName -a $withKeyringBackendParam $with_key_home_param) $curAdminAmount $withKeyringBackendParam --home=${deployDir}/nodes/node1"
-    execShellCommand "./$chainBinName add-genesis-account $(./"$chainBinName" keys show operator -a $withKeyringBackendParam $with_key_home_param) 0$coinUnit $withKeyringBackendParam --home=${deployDir}/nodes/node1"
+    execShellCommand "./$chainBinName add-genesis-account $(./$chainBinName keys show $adminName -a $withKeyringBackendParam $with_key_home_param) $curAdminAmount $withKeyringBackendParam --home=${deployDir}/nodes/node1"
+    execShellCommand "./$chainBinName add-genesis-account $(./$chainBinName keys show operator -a $withKeyringBackendParam $with_key_home_param) 0$coinUnit $withKeyringBackendParam --home=${deployDir}/nodes/node1"
     execShellCommand "./$chainBinName add-genesis-module-account stake_tokens_pool 10000000000$coinUnit --home ${deployDir}/nodes/node1"
 
     # Sign genesis transaction
@@ -152,13 +152,13 @@ setupMasterNodeConfig() {
 setFixedDepositInterestRate() {
     echo "setFixedDepositInterestRate begin..."
     cd "${chainBinDir}"
-    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_1_MONTHS 0.05 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) $chainId $withKeyringBackendParam -y -s=1"
-    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_3_MONTHS 0.10 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) $chainId $withKeyringBackendParam -y -s=2"
-    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_6_MONTHS 0.15 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) $chainId $withKeyringBackendParam -y -s=3"
-    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_12_MONTHS 0.20 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) $chainId $withKeyringBackendParam -y -s=4"
-    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_24_MONTHS 0.30 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) $chainId $withKeyringBackendParam -y -s=5"
-    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_36_MONTHS 0.40 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) $chainId $withKeyringBackendParam -y -s=6"
-    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_48_MONTHS 0.50 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) $chainId $withKeyringBackendParam -y -s=7"
+    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_1_MONTHS 0.05 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y -s=1"
+    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_3_MONTHS 0.10 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y -s=2"
+    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_6_MONTHS 0.15 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y -s=3"
+    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_12_MONTHS 0.20 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y -s=4"
+    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_24_MONTHS 0.30 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y -s=5"
+    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_36_MONTHS 0.40 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y -s=6"
+    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_48_MONTHS 0.50 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y -s=7"
     echo "setFixedDepositInterestRate finish..."
     sleep 10
     execShellCommand "./$chainBinName q staking show-fixed-deposit-interest-rate"
