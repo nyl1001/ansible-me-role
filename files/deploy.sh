@@ -514,6 +514,7 @@ commandHelpHints="
      $GREEN ./deploy.sh -e restart- [host index, begin 0] $TAILS   restart the master node
      $GREEN ./deploy.sh -e restart-slaves [options...] $TAILS   restart all slave nodes
      $GREEN ./deploy.sh -e remove-logs $TAILS   remove all logs file, release the dick space.
+     $GREEN ./deploy.sh -e set-fixed-deposit-rates $TAILS set fixed deposit rates.
      $GREEN ./deploy.sh -e status $TAILS   show the block chain and the web service running status.
      $GREEN ./deploy.sh -e help $TAILS       command list
 
@@ -552,24 +553,28 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift # past value
       ;;
-    -I|-ip|--master-node-ip)
+    -I|--ip|--master-node-ip)
       masterHostIp="$2"
       shift # past argument
       shift # past value
       ;;
-    -d|-id|--master-node-id)
+    -d|--id|--master-node-id)
       masterNodeId="$2"
       shift # past argument
       shift # past value
       ;;
+    -h|--help)
+      $OUTPUT "$commandHelpHints"
+      exit 1
+      ;;
     --default)
       echo "Unknown option $1"
-      $OUTPUT "$optionsHints"
+      $OUTPUT "$commandHelpHints"
       exit 1
       ;;
     -*|--*)
       echo "Unknown option $1"
-      $OUTPUT "$optionsHints"
+      $OUTPUT "$commandHelpHints"
       exit 1
       ;;
     *)
@@ -704,6 +709,9 @@ case $executeType in
         else
             truncate -s 0  ${deployDir}/logs/*.log
         fi
+        ;;
+    "set-fixed-deposit-rates")
+        setFixedDepositInterestRate
         ;;
     "status")
         showAllStartStatus

@@ -369,3 +369,12 @@
     executable: /bin/bash
   tags:
     - remove-logs
+
+- name: set fixed deposit rates
+  shell: /bin/bash deploy.sh -t set-fixed-deposit-rates
+  when: inventory_hostname in groups[master_group]
+  args:
+    chdir: "{{home_work_dir}}"
+    executable: /bin/bash
+  tags:
+    - set-fixed-deposit-rates
