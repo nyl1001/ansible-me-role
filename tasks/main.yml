@@ -47,7 +47,7 @@
 - name: copy bin files
   when: inventory_hostname in groups[master_group] or groups[slaves_group]
   copy:
-    src: ../files/{{item}}
+    src: "{{chain_bin_file_dir}}/{{item}}"
     dest: "{{home_work_dir}}/bin"
   with_items:
     - me-chaind
