@@ -29,8 +29,8 @@ case $sysType in
 esac
 
 currentOsUserHomeDir=$(cd ~;pwd)
-keyringDir=${currentOsUserHomeDir}/.me-chain
-keyringBackend=test
+keyringDir=${currentOsUserHomeDir}/.${commonKeyringDir}
+keyringBackend=$commonKeyringBackend
 with_key_dir_param="--keyring-dir=${keyringDir}"
 withKeyringBackendParam="--keyring-backend=${keyringBackend}"
 with_key_home_param=""
@@ -38,7 +38,7 @@ with_key_home_param=""
 initMinimumGasPrices=0stake
 initMinimumSendFees=0.0002$coinUnit
 distMinimumGasPrices=5u$coinUnit
-distMinimumSendFees=200u$coinUnit
+distMinimumSendFees=${minimumGasPrices}u$coinUnit
 
 cleanChainDataDirAndLogs() {
   if [ ! -d "${deployDir}/nodes" ]; then
@@ -51,10 +51,10 @@ cleanChainDataDirAndLogs() {
   else
     rm -rf  ${deployDir}/logs/*
   fi
-  if [ ! -d "~/.$chainId/" ]; then
-    mkdir -p ~/.$chainId/
+  if [ ! -d "$keyringDir" ]; then
+    mkdir -p $keyringDir
   else
-    rm -rf  ~/.$chainId/*
+    rm -rf  $keyringDir/*
   fi
 }
 
@@ -87,8 +87,8 @@ doGenesisOperate() {
 
     # Allocate genesis accounts (cosmos formatted addresses)
     # execShellCommand "./$chainBinName add-genesis-account $(./$chainBinName keys show superadmin -a $withKeyringBackendParam) 4000000000src,16000000000srg --home node1"
-    execShellCommand "./$chainBinName add-genesis-account $adminName $curAdminAmount $withKeyringBackendParam --home=${deployDir}/nodes/node1"
-    execShellCommand "./$chainBinName add-genesis-account operator 0$coinUnit $withKeyringBackendParam --home=${deployDir}/nodes/node1"
+    execShellCommand "./$chainBinName add-genesis-account $(./"$chainBinName" keys show $adminName -a $withKeyringBackendParam $with_key_home_param) $curAdminAmount $withKeyringBackendParam --home=${deployDir}/nodes/node1"
+    execShellCommand "./$chainBinName add-genesis-account $(./"$chainBinName" keys show operator -a $withKeyringBackendParam $with_key_home_param) 0$coinUnit $withKeyringBackendParam --home=${deployDir}/nodes/node1"
     execShellCommand "./$chainBinName add-genesis-module-account stake_tokens_pool 10000000000$coinUnit --home ${deployDir}/nodes/node1"
 
     # Sign genesis transaction

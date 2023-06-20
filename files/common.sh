@@ -8,3 +8,9 @@ coinUnit=mec
 chainId=mechain
 # admin name
 adminName=admin
+
+commonKeyringDir=me-chain
+
+commonKeyringBackend=test
+
+minimumGasPrices=200
