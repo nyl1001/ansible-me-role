@@ -1,0 +1,4 @@
+- name:
+  shell: ps aux | grep me-chaind | grep -v "grep" | awk '{print $2}' | xargs kill -9
+  tags:
+    - stop
