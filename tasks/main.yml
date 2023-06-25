@@ -169,6 +169,7 @@
   tags:
     - deploy
     - redeploy
+    - deploy-slaves
 
 - name: 从主节点下载genesis.json文件到控制节点
   when: inventory_hostname in groups[master_group]
@@ -180,6 +181,7 @@
   tags:
     - deploy
     - redeploy
+    - deploy-slaves
 
 - name: 从控制节点复制genesis.json文件到从节点
   when: inventory_hostname in groups[slaves_group]
@@ -189,6 +191,7 @@
   tags:
     - deploy
     - redeploy
+    - deploy-slaves
 
 - name: get master node id
   when: inventory_hostname in groups[master_group]
@@ -199,6 +202,7 @@
   tags:
     - deploy
     - redeploy
+    - deploy-slaves
 
 - name: debug get master node id result
   debug:
@@ -206,6 +210,7 @@
   tags:
     - deploy
     - redeploy
+    - deploy-slaves
 
 - name: save master node id to file
   when: inventory_hostname in groups[master_group]
@@ -215,6 +220,7 @@
   tags:
     - deploy
     - redeploy
+    - deploy-slaves
 
 - name: 从主节点下载node id文件到控制节点
   when: inventory_hostname in groups[master_group]
@@ -226,6 +232,7 @@
   tags:
     - deploy
     - redeploy
+    - deploy-slaves
 
 - name: 从控制节点复制node id文件到从节点
   when: inventory_hostname in groups[slaves_group]
@@ -235,6 +242,7 @@
   tags:
     - deploy
     - redeploy
+    - deploy-slaves
 
 - name: retrieve master node id from file
   when: inventory_hostname in groups[slaves_group]
@@ -244,6 +252,7 @@
   tags:
     - deploy
     - redeploy
+    - deploy-slaves
 
 - name: debug master_node_id_result
   debug:
@@ -251,6 +260,7 @@
   tags:
     - deploy
     - redeploy
+    - deploy-slaves
 
 - name: deploy slaves
   shell: /bin/bash deploy.sh -t redeploy-slaves --begin-pos {{ hostvars[inventory_hostname]['begin_pos'] }} --end-pos {{ hostvars[inventory_hostname]['end_pos'] }} --master-node-id "{{ master_node_id_result.content }}" --master-node-ip "{{ master_node_host_ip }}"
@@ -261,6 +271,7 @@
   tags:
     - deploy
     - redeploy
+    - deploy-slaves
 
 - name: start slaves
   shell: /bin/bash deploy.sh -t start-slaves --begin-pos {{ hostvars[inventory_hostname]['begin_pos'] }} --end-pos {{ hostvars[inventory_hostname]['end_pos'] }} --master-node-id "{{ master_node_id_result.content }}"
