@@ -31,6 +31,8 @@
     - restart
     - remove-logs
     - init-common
+    - restore-gas-prices
+    - set-gas-prices
 
 - name: copy main shell script files
   when: inventory_hostname in groups[master_group] or groups[slaves_group]
@@ -48,6 +50,23 @@
     - restart
     - remove-logs
 
+#- name: init common shell script
+#  when: inventory_hostname in groups[master_group] or groups[slaves_group]
+#  shell: /bin/bash init_common.sh --chain-bin-name {{common.chain_bin_name}} --coin-unit {{common.coin_unit}} \
+#    --admin-name {{common.admin_name}} --explorer-backend-bin-name {{common.explorer_backend_bin_name}} --chain-id {{common.chain_id}} \
+#    --keyring-dir {{common.keyring_dir}} --keyring-backend {{common.keyring_backend}} --minimum-gas-prices {{common.minimum_gas_prices}}
+#  args:
+#    chdir: "{{chain_deploy_home_dir}}"
+#    executable: /bin/bash
+#  tags:
+#    - deploy
+#    - redeploy
+#    - start
+#    - restart
+#    - only-upgrade-chain-bin
+#    - only-start-stopped-chain-node
+#    - init-common
+
 - name: mkdir bin dir
   when: inventory_hostname in groups[master_group] or groups[slaves_group]
   shell: mkdir -p bin
@@ -62,8 +81,8 @@
 - name: copy bin files
   when: inventory_hostname in groups[master_group] or groups[slaves_group]
   copy:
-    src: "{{chain_bin_file_dir}}/{{item}}"
-    dest: "{{chain_deploy_home_dir}}/bin/"
+    src: ../files/{{item}}
+    dest: "{{chain_deploy_home_dir}}/bin"
   with_items:
     - "{{ common.chain_bin_name }}"
   tags:
@@ -107,7 +126,7 @@
     - only-start-stopped-chain-node
 
 - name: deploy master
-  shell: /bin/bash deploy.sh -t redeploy --begin-pos {{ hostvars[inventory_hostname]['begin_pos'] }} --end-pos {{ hostvars[inventory_hostname]['end_pos'] }} --admin-amount 0mec && sleep 5
+  shell: /bin/bash deploy.sh -t redeploy --begin-pos {{ hostvars[inventory_hostname]['begin_pos'] }} --end-pos {{ hostvars[inventory_hostname]['end_pos'] }} --admin-amount 0{{ common.coin_unit }} && sleep 5
   when: inventory_hostname in groups[master_group]
   args:
     chdir: "{{chain_deploy_home_dir}}"
@@ -373,6 +392,15 @@
   tags:
     - set-fixed-deposit-rates
 
+- name: get help hints
+  shell: /bin/bash deploy.sh -help
+  when: inventory_hostname in groups[slaves_group] or groups[master_group]
+  args:
+    chdir: "{{chain_deploy_home_dir}}"
+    executable: /bin/bash
+  tags:
+    - help
+
 - name: restore the minimum gas prices in both the master node and all the slave nodes for the master host
   shell: /bin/bash deploy.sh -t restore-master-gas-prices --begin-pos {{ hostvars[inventory_hostname]['begin_pos'] }} --end-pos {{ hostvars[inventory_hostname]['end_pos'] }}
   when: inventory_hostname in groups[master_group]
@@ -408,4 +436,3 @@
     executable: /bin/bash
   tags:
     - set-gas-prices
-
