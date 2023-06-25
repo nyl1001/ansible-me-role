@@ -152,15 +152,22 @@ setupMasterNodeConfig() {
 setFixedDepositInterestRate() {
     echo "setFixedDepositInterestRate begin..."
     cd "${chainBinDir}"
-    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_1_MONTHS 0.05 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y -s=1"
-    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_3_MONTHS 0.10 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y -s=2"
-    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_6_MONTHS 0.15 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y -s=3"
-    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_12_MONTHS 0.20 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y -s=4"
-    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_24_MONTHS 0.30 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y -s=5"
-    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_36_MONTHS 0.40 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y -s=6"
-    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_48_MONTHS 0.50 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y -s=7"
+    local curSleepTime=10
+    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_1_MONTHS 0.05 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y"
+    sleep $curSleepTime
+    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_3_MONTHS 0.10 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y"
+    sleep $curSleepTime
+    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_6_MONTHS 0.15 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y"
+    sleep $curSleepTime
+    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_12_MONTHS 0.20 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y"
+    sleep $curSleepTime
+    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_24_MONTHS 0.30 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y"
+    sleep $curSleepTime
+    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_36_MONTHS 0.40 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y"
+    sleep $curSleepTime
+    execShellCommand "./$chainBinName tx staking set-fixed-deposit-interest-rate TERM_48_MONTHS 0.50 --from=$(./$chainBinName keys show $adminName -a $withKeyringBackendParam) --chain-id=$chainId $withKeyringBackendParam -y"
+    sleep $curSleepTime
     echo "setFixedDepositInterestRate finish..."
-    sleep 10
     execShellCommand "./$chainBinName q staking show-fixed-deposit-interest-rate"
 }
 
@@ -179,7 +186,6 @@ startMasterNodeIfStopped(){
 #    sleep 10
     autoGetMasterNodeId=$(./$chainBinName tendermint show-node-id --home ${deployDir}/nodes/node1)
     echo "output master node id - $autoGetMasterNodeId"
-    setFixedDepositInterestRate
 }
 
 restartMasterNode(){
@@ -194,7 +200,6 @@ restartMasterNode(){
 #    sleep 10
     autoGetMasterNodeId=$(./$chainBinName tendermint show-node-id --home ${deployDir}/nodes/node1)
     echo "output master node id - $autoGetMasterNodeId"
-    setFixedDepositInterestRate
 }
 
 setupMasterNodeAndStart() {
