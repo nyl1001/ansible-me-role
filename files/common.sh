@@ -13,4 +13,10 @@ commonKeyringDir=me-chain
 
 commonKeyringBackend=test
 
-minimumGasPrices=200
+initMinimumGasPrices=0stake
+
+initMinimumSendFees=0.0002
+
+finalMinimumGasPrices=5
+
+finalMinimumSendFees=200
