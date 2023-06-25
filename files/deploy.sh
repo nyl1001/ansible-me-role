@@ -87,8 +87,8 @@ doGenesisOperate() {
 
     # Allocate genesis accounts (cosmos formatted addresses)
     # execShellCommand "./$chainBinName add-genesis-account $(./$chainBinName keys show superadmin -a $withKeyringBackendParam) 4000000000src,16000000000srg --home node1"
-    execShellCommand "./$chainBinName add-genesis-account $(./$chainBinName keys show $adminName -a $withKeyringBackendParam $with_key_home_param) $curAdminAmount $withKeyringBackendParam --home=${deployDir}/nodes/node1"
-    execShellCommand "./$chainBinName add-genesis-account $(./$chainBinName keys show operator -a $withKeyringBackendParam $with_key_home_param) 0$coinUnit $withKeyringBackendParam --home=${deployDir}/nodes/node1"
+    execShellCommand "./$chainBinName add-genesis-account $(./"$chainBinName" keys show $adminName -a $withKeyringBackendParam $with_key_home_param) $curAdminAmount $withKeyringBackendParam --home=${deployDir}/nodes/node1"
+    execShellCommand "./$chainBinName add-genesis-account $(./"$chainBinName" keys show operator -a $withKeyringBackendParam $with_key_home_param) 0$coinUnit $withKeyringBackendParam --home=${deployDir}/nodes/node1"
     execShellCommand "./$chainBinName add-genesis-module-account stake_tokens_pool 10000000000$coinUnit --home ${deployDir}/nodes/node1"
 
     # Sign genesis transaction
@@ -105,7 +105,7 @@ doGenesisOperate() {
 setupMasterNodeConfig() {
     app_toml="${deployDir}/nodes/node1/config/app.toml"
     # update gas-prices
-    $sedI  's#minimum-gas-prices = "'"$initMinimumGasPrices"'"#minimum-gas-prices = "'"$distMinimumGasPrices"'"#g' $app_toml
+#    $sedI  's#minimum-gas-prices = "'"$initMinimumGasPrices"'"#minimum-gas-prices = "'"$distMinimumGasPrices"'"#g' $app_toml
     $sedI  's#minimum-send-fees = "'"$initMinimumSendFees"'"#minimum-send-fees = "'"$distMinimumSendFees"'"#g' $app_toml
 
 
@@ -329,7 +329,7 @@ setupAllSlaveNodesAndStart() {
         config_toml="${deployDir}/nodes/node$i/config/config.toml"
 
         # update gas-prices
-        $sedI 's#minimum-gas-prices = "'"$initMinimumGasPrices"'"#minimum-gas-prices = "'"$distMinimumGasPrices"'"#g' $app_toml
+#        $sedI 's#minimum-gas-prices = "'"$initMinimumGasPrices"'"#minimum-gas-prices = "'"$distMinimumGasPrices"'"#g' $app_toml
         $sedI 's#minimum-send-fees = "'"$initMinimumSendFees"'"#minimum-send-fees = "'"$distMinimumSendFees"'"#g' $app_toml
 
         # [api] Only change the content under the api
@@ -399,6 +399,50 @@ setupAllSlaveNodesAndStart() {
 
         last_slave_node_id=$(./$chainBinName tendermint show-node-id --home "${deployDir}"/nodes/node"$i")
         echo "output slave node node$i id - $last_slave_node_id"
+    done
+}
+
+restoreAllNodesMinimumGasPrice(){
+    local curBeginIndex=1
+    if [ -z "$1" ] ;then
+        curBeginIndex=1
+    else
+        curBeginIndex=$1
+    fi
+    local curEndIndex=1
+    if [ -z "$2" ] ;then
+        curEndIndex=1
+    else
+        curEndIndex=$2
+    fi
+    cd ${chainBinDir}
+    for i in $(seq "$curBeginIndex" "$curEndIndex"); do
+        # update app.toml
+        app_toml="${deployDir}/nodes/node$i/config/app.toml"
+        # update gas-prices
+        $sedI 's#minimum-gas-prices = "'"$distMinimumGasPrices"'"#minimum-gas-prices = "'"$initMinimumGasPrices"'"#g' $app_toml
+    done
+}
+
+setAllNodesMinimumGasPrice(){
+    local curBeginIndex=1
+    if [ -z "$1" ] ;then
+        curBeginIndex=1
+    else
+        curBeginIndex=$1
+    fi
+    local curEndIndex=1
+    if [ -z "$2" ] ;then
+        curEndIndex=1
+    else
+        curEndIndex=$2
+    fi
+    cd ${chainBinDir}
+    for i in $(seq "$curBeginIndex" "$curEndIndex"); do
+        # update app.toml
+        app_toml="${deployDir}/nodes/node$i/config/app.toml"
+        # update gas-prices
+        $sedI 's#minimum-gas-prices = "'"$initMinimumGasPrices"'"#minimum-gas-prices = "'"$distMinimumGasPrices"'"#g' $app_toml
     done
 }
 
@@ -510,10 +554,14 @@ commandHelpHints="
      $GREEN ./deploy.sh -e redeploy-slaves [options...] $TAILS  redeploy the block chain slave nodes, all old slave node data will be lost.
      $GREEN ./deploy.sh -e start-master [host index, begin 0] $TAILS  start the master node if stopped
      $GREEN ./deploy.sh -e start-slaves [options...] $TAILS   start all slave nodes if stopped
-     $GREEN ./deploy.sh -e restart [options...] $TAILS   restart both master node and slave nodes of the block chain.
+     $GREEN ./deploy.sh -e restart [options...] $TAILS   restart both the master node and all the slave nodes in the master host.
      $GREEN ./deploy.sh -e restart-chain [options...] $TAILS   restart both master node and slave nodes of the block chain.
-     $GREEN ./deploy.sh -e restart- [host index, begin 0] $TAILS   restart the master node
+     $GREEN ./deploy.sh -e restart-master [options...] $TAILS   restart both the master node and all the slave nodes in the master host.
      $GREEN ./deploy.sh -e restart-slaves [options...] $TAILS   restart all slave nodes
+     $GREEN ./deploy.sh -e restore-master-gas-prices [options...] $TAILS   restore the minimum gas prices in both the master node and all the slave nodes for the master host.
+     $GREEN ./deploy.sh -e set-master-gas-prices [options...] $TAILS   set the minimum gas prices in both the master node and all the slave nodes for the master host.
+     $GREEN ./deploy.sh -e restore-slaves-gas-prices [options...] $TAILS   restore the minimum gas prices in all the slave nodes for the slave host.
+     $GREEN ./deploy.sh -e set-slaves-gas-prices [options...] $TAILS   set the minimum gas prices in all the slave nodes for the slave host.
      $GREEN ./deploy.sh -e remove-logs $TAILS   remove all logs file, release the dick space.
      $GREEN ./deploy.sh -e set-fixed-deposit-rates $TAILS set fixed deposit rates.
      $GREEN ./deploy.sh -e status $TAILS   show the block chain and the web service running status.
@@ -554,7 +602,7 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift # past value
       ;;
-    -I|--ip|--master-node-ip)
+    -I|-ip|--master-node-ip)
       masterHostIp="$2"
       shift # past argument
       shift # past value
@@ -627,7 +675,6 @@ if [ "$hostIndex" -gt -1 ] && [ "$nodeCount" -gt 0 ]; then
     fi
 fi
 
-
 if [ "$beginPos" -gt 0 ]; then
     globalStartIndex=$beginPos
     globalEndIndex=$endPos
@@ -695,12 +742,35 @@ case $executeType in
         ;;
     "restart-master")
         checkBasicInputArgs
-        restartMasterNode
-        showAllStartStatus
+        restartAll "$globalStartIndex" "$globalEndIndex"
         ;;
     "restart-slaves")
 #        nodeCount=$(($nodeCount+1))
         checkBasicInputArgs
+        restartAllSlaveNodes "$globalStartIndex" "$globalEndIndex"
+        showAllStartStatus
+        ;;
+    "restore-master-gas-prices")
+        checkBasicInputArgs
+        restoreAllNodesMinimumGasPrice "$globalStartIndex" "$globalEndIndex"
+        restartChain "$globalStartIndex" "$globalEndIndex"
+        showAllStartStatus
+        ;;
+    "set-master-gas-prices")
+        checkBasicInputArgs
+        setAllNodesMinimumGasPrice "$globalStartIndex" "$globalEndIndex"
+        restartChain "$globalStartIndex" "$globalEndIndex"
+        showAllStartStatus
+        ;;
+    "restore-slaves-gas-prices")
+        checkBasicInputArgs
+        restoreAllNodesMinimumGasPrice "$globalStartIndex" "$globalEndIndex"
+        restartAllSlaveNodes "$globalStartIndex" "$globalEndIndex"
+        showAllStartStatus
+        ;;
+    "set-slaves-gas-prices")
+        checkBasicInputArgs
+        setAllNodesMinimumGasPrice "$globalStartIndex" "$globalEndIndex"
         restartAllSlaveNodes "$globalStartIndex" "$globalEndIndex"
         showAllStartStatus
         ;;

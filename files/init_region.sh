@@ -16,7 +16,7 @@ cd "$deployDir"/bin
 
 adminAddr=$(./"$chainBinName" keys show $adminName -a --keyring-backend=test)
 
-fees_amount="1mec"
+fees_amount="1$coinUnit"
 
 optionsHints="
   $GREEN options: $0 [-t|--type|--execute-type 执行类型]
@@ -158,13 +158,20 @@ createRegions(){
         newRegionId=${lowercaseRegionName}id
         echo "pubkey is : $pubKey"
 
+        admin_amount=$(./me-chaind query bank balances ${adminAddr}| grep ' amount' | awk -F ': ' '{print $2}' | sed 's/^"\(.*\)"$/\1/')
+        if [ -z $admin_amount ] || [ $admin_amount -lt 10000000 ]; then
+            printf "\n"
+            echo -e "管理员账户金额不足，只有 ${admin_amount} u$coinUnit , 给管理员账号转账"
+            execShellCommand "./$chainBinName tx bank sendToAdmin 100mec --from=$adminAddr --keyring-backend=test -y"
+            sleep $sleepTimeCount
+        fi
         operatorAddr=$(./$chainBinName query staking validators | grep "moniker: node$nodeIndex" -B 13 -A 12 | grep 'operator_address' | awk -F ': ' '{print $2}')
         if [ -z $operatorAddr ]; then
             printf "\n"
             echo -e "未找到验证者，创建验证者"
             sleep 2
             # 创建验证者
-            execShellCommand "./$chainBinName tx staking create-validator --amount=$localTotalAs --pubkey=$pubKey --moniker=node$nodeIndex --commission-rate="0.10" --commission-max-rate="0.20" --commission-max-change-rate="0.01"  --from=$adminAddr --keyring-backend test --chain-id $chainId --fees $fees_amount --home $deployDir/nodes/node1 -y"
+            execShellCommand "./$chainBinName tx staking create-validator --amount=${localTotalAs}${coinUnit} --pubkey=$pubKey --moniker=node$nodeIndex --commission-rate="0.10" --commission-max-rate="0.20" --commission-max-change-rate="0.01"  --from=$adminAddr --keyring-backend test --chain-id $chainId --fees $fees_amount -y"
             echo -e "\n"
 
             sleep $sleepTimeCount
@@ -175,7 +182,7 @@ createRegions(){
         existRegionValAddr=$(./$chainBinName q staking list-region | grep "name: $localRegionName" -A 3 -B 1 | grep 'operator_address' | awk -F ': ' '{print $2}')
         if [ -z $existRegionValAddr ]; then
             echo -e "区不存在，需要创建区，绑定验证者"
-            execShellCommand "./$chainBinName tx staking new-region $newRegionId $localRegionName $operatorAddr --from=$adminAddr --chain-id=$chainId --fees=$fees_amount --keyring-backend test --home $deployDir/nodes/node1 -y"
+            execShellCommand "./$chainBinName tx staking new-region $newRegionId $localRegionName $operatorAddr --from=$adminAddr --chain-id=$chainId --fees=$fees_amount --keyring-backend test -y"
             echo -e "\n"
             sleep $(expr $sleepTimeCount + 2)
         else
@@ -184,12 +191,12 @@ createRegions(){
                 existRegionId=$(./$chainBinName q staking list-region | grep "name: $localRegionName" -A 3 -B 1 | grep 'regionId' | awk -F ': ' '{print $2}')
                 echo -e "该区域所绑定的验证者发生变化，需要重新绑定"
                 echo -e "删除区域 id : $existRegionId"
-                execShellCommand "./$chainBinName tx staking remove-region $existRegionId --from=$adminAddr --chain-id=$chainId --fees=$fees_amount --keyring-backend test --home $deployDir/nodes/node1 -y"
+                execShellCommand "./$chainBinName tx staking remove-region $existRegionId --from=$adminAddr --chain-id=$chainId --fees=$fees_amount --keyring-backend test -y"
                 echo -e "\n"
                 sleep $sleepTimeCount
 
                 echo -e "创建新区，并绑定验证者"
-                execShellCommand "./$chainBinName tx staking new-region ${lowercaseRegionName}id $localRegionName $operatorAddr --from=$adminAddr --chain-id=$chainId --fees=$fees_amount --keyring-backend test --home $deployDir/nodes/node1 -y"
+                execShellCommand "./$chainBinName tx staking new-region ${lowercaseRegionName}id $localRegionName $operatorAddr --from=$adminAddr --chain-id=$chainId --fees=$fees_amount --keyring-backend test -y"
                 echo -e "\n"
                 sleep $(expr $sleepTimeCount + 2)
             fi
