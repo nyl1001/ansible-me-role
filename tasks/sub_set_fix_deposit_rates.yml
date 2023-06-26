@@ -1,0 +1,35 @@
+- name: restore the minimum gas prices in both the master node and all the slave nodes for the master host
+  shell: /bin/bash deploy.sh -t restore-master-gas-prices --begin-pos {{ hostvars[inventory_hostname]['begin_pos'] }} --end-pos {{ hostvars[inventory_hostname]['end_pos'] }}
+  when: inventory_hostname in groups[master_group]
+  args:
+    chdir: "{{chain_deploy_home_dir}}"
+    executable: /bin/bash
+  tags:
+    - restore-gas-prices
+
+- name: set the minimum gas prices in both the master node and all the slave nodes for the master host
+  shell: /bin/bash deploy.sh -t set-master-gas-prices --begin-pos {{ hostvars[inventory_hostname]['begin_pos'] }} --end-pos {{ hostvars[inventory_hostname]['end_pos'] }}
+  when: inventory_hostname in groups[master_group]
+  args:
+    chdir: "{{chain_deploy_home_dir}}"
+    executable: /bin/bash
+  tags:
+    - set-gas-prices
+
+- name: restore the minimum gas prices in all the slave nodes for the slave host
+  shell: /bin/bash deploy.sh -t restore-slaves-gas-prices --begin-pos {{ hostvars[inventory_hostname]['begin_pos'] }} --end-pos {{ hostvars[inventory_hostname]['end_pos'] }}
+  when: inventory_hostname in groups[slaves_group]
+  args:
+    chdir: "{{chain_deploy_home_dir}}"
+    executable: /bin/bash
+  tags:
+    - restore-gas-prices
+
+- name: set the minimum gas prices in all the slave nodes for the slave host
+  shell: /bin/bash deploy.sh -t set-slaves-gas-prices --begin-pos {{ hostvars[inventory_hostname]['begin_pos'] }} --end-pos {{ hostvars[inventory_hostname]['end_pos'] }}
+  when: inventory_hostname in groups[slaves_group]
+  args:
+    chdir: "{{chain_deploy_home_dir}}"
+    executable: /bin/bash
+  tags:
+    - set-gas-prices
