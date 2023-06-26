@@ -44,17 +44,17 @@ cleanChainDataDirAndLogs() {
   if [ ! -d "${deployDir}/nodes" ]; then
     mkdir -p ${deployDir}/nodes
   else
-    rm -rf  ${deployDir}/nodes/*
+    rm -rf ${deployDir}/nodes/*
   fi
   if [ ! -d "${deployDir}/logs" ]; then
     mkdir -p ${deployDir}/logs
   else
-    rm -rf  ${deployDir}/logs/*
+    rm -rf ${deployDir}/logs/*
   fi
   if [ ! -d "$keyringDir" ]; then
     mkdir -p $keyringDir
   else
-    rm -rf  $keyringDir/*
+    rm -rf $keyringDir/*
   fi
 }
 
@@ -225,6 +225,7 @@ initAllSlaveNodes() {
     for i in $(seq "$curBeginIndex" "$curEndIndex"); do
         if [ -d "${deployDir}/nodes/node$i" ]; then
             rm -rf ${deployDir}/nodes/node$i
+            rm -rf ${deployDir}/logs/node$i.log
         fi
         execShellCommand "./$chainBinName init ${deployDir}/nodes/node$i --chain-id=$chainId --home=${deployDir}/nodes/node$i"
         echo "init ${deployDir}/nodes/node$i finish..."
@@ -719,8 +720,6 @@ case $executeType in
             exit 0
         fi
 #        nodeCount=$(($nodeCount+1))
-        pkill "$chainBinName"
-        cleanChainDataDirAndLogs
         initAllSlaveNodes "$globalStartIndex" "$globalEndIndex"
         setupAllSlaveNodesAndStart "$globalStartIndex" "$globalEndIndex" "$masterNodeId" "$masterHostIp"
         ;;

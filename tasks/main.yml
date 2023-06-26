@@ -50,6 +50,7 @@
     - restart
     - remove-logs
     - set-fixed-deposit-rates
+    - deploy-slaves
 
 #- name: init common shell script
 #  when: inventory_hostname in groups[master_group] or groups[slaves_group]
